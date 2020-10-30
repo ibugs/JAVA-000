@@ -18,7 +18,7 @@ public class TestHttpClient {
 	public static void main(String[] args) {
 		//1. 获得一个httpclient对象
 		CloseableHttpClient httpclient = HttpClients.createDefault();
-		//2. 生成一个get请求，获取老师给的jar包的请求 java -jar ./gateway-server-0.0.1-SNAPSHOT.jar
+		//2. 生成一个get请求，获取老师给的jar包的请求 ko -jar ./gateway-server-0.0.1-SNAPSHOT.jar
 		HttpGet httpget = new HttpGet("http://127.0.0.1:8088/api/hello");
 		httpget.setProtocolVersion(HttpVersion.HTTP_1_0);
 		httpget.addHeader(HTTP.CONN_DIRECTIVE, HTTP.CONN_CLOSE);
