@@ -4,10 +4,10 @@ package nio02.m.ma.ko.io.github.kimmking.gateway.outbound.httpclient4;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpUtil;
+import io.netty.handler.codec.http.*;
+import nio02.m.ma.ko.io.github.kimmking.gateway.filter.HttpRequestFilter;
+import nio02.m.ma.ko.io.github.kimmking.gateway.filter.HttpRequestFilterHandler;
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.concurrent.FutureCallback;
@@ -28,6 +28,7 @@ public class HttpOutboundHandler {
     private CloseableHttpAsyncClient httpclient;
     private ExecutorService proxyService;
     private String backendUrl;
+    private HttpRequestFilterHandler requestFilterHandler;
     
     public HttpOutboundHandler(String backendUrl){
         this.backendUrl = backendUrl.endsWith("/")?backendUrl.substring(0,backendUrl.length()-1):backendUrl;
@@ -104,11 +105,19 @@ public class HttpOutboundHandler {
             response = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.wrappedBuffer(body));
             response.headers().set("Content-Type", "application/json");
             response.headers().setInt("Content-Length", Integer.parseInt(endpointResponse.getFirstHeader("Content-Length").getValue()));
-    
-//            for (Header e : endpointResponse.getAllHeaders()) {
-//                //response.headers().set(e.getName(),e.getValue());
-//                System.out.println(e.getName() + " => " + e.getValue());
-//            } 
+
+            // 1. 打印出前端传递的
+            HttpHeaders requestHeaders = fullRequest.headers();
+            System.out.println("获取request的 header信息 =>"+requestHeaders.get(HttpRequestFilterHandler.NIO_KEY));
+            // 2. 把这个信息传递给前端的response中
+            response.headers().set(HttpRequestFilterHandler.NIO_KEY, requestHeaders.get(HttpRequestFilterHandler.NIO_KEY));
+
+
+            for (Header e : endpointResponse.getAllHeaders()) {
+                //response.headers().set(e.getName(),e.getValue());
+                // 打印出前面传递的nio的header头，然后做一些过滤的事情
+                System.out.println(e.getName() + " => " + e.getValue());
+            }
         
         } catch (Exception e) {
             e.printStackTrace();
