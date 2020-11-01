@@ -6,8 +6,12 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.util.ReferenceCountUtil;
 import nio02.m.ma.ko.io.github.kimmking.gateway.filter.HttpRequestFilterHandler;
 import nio02.m.ma.ko.io.github.kimmking.gateway.outbound.httpclient4.HttpOutboundHandler;
+import nio02.m.ma.ko.io.github.kimmking.gateway.router.HttpEndpointRouterHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class HttpInboundHandler extends ChannelInboundHandlerAdapter {
 
@@ -15,10 +19,12 @@ public class HttpInboundHandler extends ChannelInboundHandlerAdapter {
     private final String proxyServer;
     private HttpOutboundHandler handler;
     private HttpRequestFilterHandler filterHandler;
-    
+    private HttpEndpointRouterHandler routerHandler;
+
     public HttpInboundHandler(String proxyServer) {
         this.proxyServer = proxyServer;
         this.filterHandler = new HttpRequestFilterHandler();
+        this.routerHandler = new HttpEndpointRouterHandler();
         handler = new HttpOutboundHandler(this.proxyServer);
     }
     
@@ -39,7 +45,9 @@ public class HttpInboundHandler extends ChannelInboundHandlerAdapter {
 //            if (uri.contains("/test")) {
 //                handlerTest(fullRequest, ctx);
 //            }
-    
+            // 实现简单的路由
+            String routeTo = routerHandler.route(Arrays.asList(fullRequest.uri().split("/")));
+            fullRequest.setUri(routeTo);
             handler.handle(fullRequest, ctx);
     
         } catch(Exception e) {
