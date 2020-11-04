@@ -1,3 +1,7 @@
+
+### CPU，内存，JVM关系图
+![cpu_memory_jvm](./images/cpu_memory_jvm.png)
+
 ### 第五课笔记
 
 ![class05](./images/5.Netty_Gateway.png)
