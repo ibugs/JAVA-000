@@ -1,5 +1,11 @@
 package thread01;
 
+/***
+ * 重点：
+ * 1. 信号量，这里的共享计数
+ * 2. 生产/消费完毕，一定要释放锁
+ * 3. 要有notifyAll()的机制，没有唤醒其他线程就只能死等着
+ */
 public class Computer {
     private static final int MAX_VALUE = 10;
     // 重点一，共享计数
