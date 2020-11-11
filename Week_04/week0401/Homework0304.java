@@ -10,7 +10,7 @@ package week0401;
 public class Homework0304 {
     public static void main(String[] args) throws Exception {
         long start = System.currentTimeMillis();
-        ResultSupport result = new ResultSupport();
+        FiboResultSupport result = new FiboResultSupport();
         for (int i = 0; i < 10000000; i++) {
             if (i == 101) {
                 System.out.println("到了101，主线程wait， " + Thread.currentThread().getName() + "wait");
@@ -26,21 +26,17 @@ public class Homework0304 {
     }
 }
 
-class ResultSupport {
-    Integer result = 0;
-}
-
 class Homework0304Thread implements Runnable {
-    private ResultSupport resultSupport;
+    private FiboResultSupport fiboResultSupport;
 
-    public Homework0304Thread(ResultSupport resultSupport) {
-        this.resultSupport = resultSupport;
+    public Homework0304Thread(FiboResultSupport fiboResultSupport) {
+        this.fiboResultSupport = fiboResultSupport;
     }
 
     @Override
     public void run() {
         FiboCall fiboCall = new FiboCall();
-        this.resultSupport.result = fiboCall.sum();
+        this.fiboResultSupport.result = fiboCall.sum();
         System.out.println("进入到了子线程" + Thread.currentThread().getName() + "fibo已经执行完毕了");
     }
 }
