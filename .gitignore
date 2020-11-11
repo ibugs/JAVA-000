@@ -1,0 +1,42 @@
+HELP.md
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**
+!**/src/test/**
+/JavaCourseCodes/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+/JavaCourseCodes/JavaCourseCodes.iml
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+
+### VS Code ###
+.vscode/
+
+### Mac ###
+.DS_Store
+
+### LOG ###
+logPath_IS_UNDEFINED/
+/logs/ROTATION_CENTER.log
+/logs/monitor/ROTATION_CENTER.log
+/logs/
