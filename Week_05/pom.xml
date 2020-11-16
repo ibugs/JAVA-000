@@ -19,6 +19,7 @@
     </properties>
 
     <dependencies>
+        <!-- 依赖自定义的starter -->
         <dependency>
             <groupId>schoolG</groupId>
             <artifactId>shoolA</artifactId>
@@ -29,6 +30,13 @@
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
             <version>1.2.72</version>
+        </dependency>
+
+        <!-- JDBC Driver for mysql -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.21</version>
         </dependency>
 
         <dependency>
