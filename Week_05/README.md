@@ -232,6 +232,7 @@ begin: Execute formate
 ##### 6. （必做）研究一下 JDBC 接口和数据库连接池，掌握它们的设计和用法：
 
   [代码](./src/main/java/com/jdbc/demo/Test.java)
+  [Impl代码](./src/main/java/com/spring/demo/service/WorkDateImpl.java)
 
   1）使用 JDBC 原生接口，实现数据库的增删改查操作。
 
