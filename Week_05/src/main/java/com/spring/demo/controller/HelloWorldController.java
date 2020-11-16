@@ -1,8 +1,10 @@
 package com.spring.demo.controller;
 
+import com.geek.service.HelloFormatTemplate;
 import com.spring.demo.entity.Teacher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 @EnableAutoConfiguration
 public class HelloWorldController {
     @Autowired
+    HelloFormatTemplate helloFormatTemplate;
+    @Autowired
     Teacher teacher;
 
     @RequestMapping("/hello")
@@ -21,4 +25,8 @@ public class HelloWorldController {
         return teacher.toString();
     }
 
+    @GetMapping("/format")
+    public String main(String[] args) {
+        return helloFormatTemplate.doFormat(teacher);
+    }
 }
