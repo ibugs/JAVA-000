@@ -3,8 +3,10 @@
 ## 第九课
 ### 1、（选做）使Java里的动态代理，实现一个简单的AOP。
 ### 2、（必做）写代码实现Spring Bean的装配，方式越多越好（XML、Annotation都可以）,提交到Github。
-1. 使用XML的方式装配
+1. 使用XML的方式装配，setter的方式注入
 在resources添加 applicationContext.xml，然后在其中添加bean的描述
+
+在Student类中添加set方法
 
 ```
   <bean id="student123"
@@ -22,7 +24,34 @@
    System.out.println(student123);
 ```
 
-2. 使用Annotation的方式来装配
+2. 使用构造器的方式注入
+
+定义有两个参数的构造器
+```
+    public Student(Integer age, String name) {
+        this.age = age;
+        this.name = name;
+    }
+```
+
+添加构造器配置的XML
+
+```
+   <bean id = "student222" class="com.spring.demo.entity.Student">
+       <constructor-arg name="age" value="99"></constructor-arg>
+       <constructor-arg name="name" value="空林"></constructor-arg>
+   </bean>
+
+```
+
+main 方法调用
+```
+   Student student222 = (Student) context.getBean("student222");
+   System.out.println(student222);
+```
+
+
+3. 使用Annotation的方式来装配
 
 先在resources添加 applicationContext.xml，然后添加bean扫描
 ```
@@ -88,84 +117,33 @@ public class Teacher {
    System.out.println(teacher);
 ```
 
-3. 第三种装配的方式，使用Autowired
+4. 自动装配
+
+使用@Autowired来自动装配
 
 ```
-@Component
-public class Baby {
-
-    @Value("张三的小孩")
-    String name;
-
-    public String getName() {
-        return name;
+    @Component
+    public class School {
+        @Autowired
+        Teacher teacher;
+    
+        public Teacher getTeacher() {
+            return teacher;
+        }
+    
+        public void setTeacher(Teacher teacher) {
+            this.teacher = teacher;
+        }
     }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-}
 ```
+在main方法中调用
 
 ```
-@Component
-public class Teacher {
+   ApplicationContext context =
+           new ClassPathXmlApplicationContext("applicationContext.xml");
 
-    @Value("12")
-    Integer age;
-
-    @Value("张老师")
-    String name;
-
-    @Value("123.2")
-    Double salary;
-
-    @Autowired
-    Baby baby;
-
-    ...
-}
-
-```
-
-applicationContext.xml 文件中进行配置
-
-```
-    <context:component-scan base-package="com.spring.demo" />
-
-    <bean id="teacher2" class="com.spring.demo.entity.Teacher"/>
-
-```
-
-使用main方法来调用
-
-```
-   Teacher teacher2 = (Teacher)context.getBean("teacher2");
-   System.out.println(teacher2.getBaby().getName());
-```
-
-4. 使用spring-boot api来显示
-
-```
-  @RestController
-  @EnableAutoConfiguration
-  public class HelloWorldController {
-      @Autowired
-      Teacher teacher;
-  
-      @RequestMapping("/hello")
-      String home(){
-          return teacher.toString();
-      }
-  
-  }
-```
-
-浏览器调用
-http://localhost:8981/hello
-
-```
-    Teacher{age=12, name='张老师', salary=123.2}
+   School sh = (School)context.getBean("school");
+   System.out.println(sh.getTeacher());
 ```
 
 

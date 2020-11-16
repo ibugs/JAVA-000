@@ -8,14 +8,27 @@
                         http://www.springframework.org/schema/context
                         http://www.springframework.org/schema/context/spring-context-3.2.xsd http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd">
 
+    <!-- 第一种方式，使用setter的方式注入 -->
     <bean id="student123"
           class="com.spring.demo.entity.Student">
         <property name="age" value="22" />
         <property name="name" value="张三" />
     </bean>
 
+    <!-- 第二种方式，使用构造器的方式注入 -->
+    <bean id = "student222" class="com.spring.demo.entity.Student">
+        <constructor-arg name="age" value="99"></constructor-arg>
+        <constructor-arg name="name" value="空林"></constructor-arg>
+    </bean>
+
+    <!-- 第三种方式，使用注解的方式注入 -->
     <context:component-scan base-package="com.spring.demo" />
 
+    <!--
     <bean id="teacher2" class="com.spring.demo.entity.Teacher"/>
+     -->
 
+    <!-- 第四种方式，自动注入
+    <bean id="school" class="com.spring.demo.entity.School" autowire="byType"></bean>
+    -->
 </beans>
