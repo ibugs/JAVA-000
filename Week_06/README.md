@@ -25,9 +25,9 @@ ALTER TABLE tb_user ADD INDEX `idx_certificate_no_of_tb_user` (certificate_no);
 
 商品表，记录商品信息
 ```$sql
-DROP TABLE IF EXISTS `tb_products`;
+DROP TABLE IF EXISTS `tb_product`;
 
-CREATE TABLE tb_products(
+CREATE TABLE tb_product(
     id bigint NOT NULL PRIMARY KEY,
     create_time timestamp NOT NULL COMMENT "创建时间",
     update_time timestamp NOT NULL COMMENT "更新时间" ON UPDATE CURRENT_TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

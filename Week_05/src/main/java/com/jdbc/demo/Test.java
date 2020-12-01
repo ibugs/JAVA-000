@@ -1,4 +1,4 @@
-package com.jdbc.demo;
+package src.main.java.com.jdbc.demo;
 
 import java.sql.*;
 
@@ -26,7 +26,7 @@ public class Test {
         PreparedStatement preparedStatement = null;
 
         try {
-            connection = JdbcUtils.getConnection();
+            connection = com.jdbc.demo.JdbcUtils.getConnection();
             // 设置关闭自动提交
             connection.setAutoCommit(false);
             String sql = "update work_date set work_date_flag = ?, trade_date_flag = ? where nature_date = ? ";
@@ -172,7 +172,7 @@ public class Test {
         ResultSet resultSet = null;
 
         try {
-            connection = JdbcUtils.getConnection();
+            connection = com.jdbc.demo.JdbcUtils.getConnection();
             String sql = "select count(*) from work_date";
             preparedStatement = connection.prepareStatement(sql);
             resultSet = preparedStatement.executeQuery();
@@ -184,7 +184,7 @@ public class Test {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            JdbcUtils.releaseDB(connection, preparedStatement, resultSet);
+            com.jdbc.demo.JdbcUtils.releaseDB(connection, preparedStatement, resultSet);
         }
 
     }
