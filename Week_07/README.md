@@ -67,8 +67,11 @@ connection 用一次，然后释放一次。总共使用了100万次，再释放
 2. 使用JDBC PreparedStatement executeBatch();
 
 耗时：204秒
-改进点
+
+改进点   
+
 1）整个过程 connection 只使用一次，大大减少了创建connection和销毁的过程
+
 2) 使用addBatch，将100万的数据编译一次，传递给MySQL执行。
 
 ``` 
@@ -121,6 +124,7 @@ connection 用一次，然后释放一次。总共使用了100万次，再释放
 3) 使用 Statement addBatch
 
 耗时：214秒
+
 虽然Statement 和 PreparedStatement 耗时没有差多少，
 但是在里面拼接SQL就非常之难受。
 
@@ -169,3 +173,87 @@ connection 用一次，然后释放一次。总共使用了100万次，再释放
 ```
 
 4) 使用MySQl的存储过程
+
+TODO
+
+##### 第14节课作业实践
+
+[Docker方式实现MySQL主从复制](https://www.jianshu.com/p/661f70a7274e)
+[Docker安装MySQL](https://www.jianshu.com/p/d9b6bbc7fd77)
+
+准备工作，使用Docker配置MySQL的主从复制
+
+``` 
+1）使用Docker运行MySQL容器
+docker run -di --name=master_mysql -p 33309:3306 -e MYSQL_ROOT_PASSWORD=root mysql:5.7
+使用docker配置主
+表示这个容器中使用3306（第二个）映射到本机的端口号为33309（第一个） 
+mysql -u root -h 127.0.0.1 -P 33309 -p
+通过这个可以访问主库
+
+
+docker run -di --name=slave_mysql -p 33306:3306 -e MYSQL_ROOT_PASSWORD=root mysql:5.7
+
+2) 进入Docker的主中
+docker exec -it master_mysql /bin/bash
+
+apt-get update
+apt-get install vim
+
+3) 编辑主的配置文件
+cd /etc/mysql
+编辑 my.cnf
+
+主
+[mysqld]
+server-id=10
+log-bin=mysql-bin
+innodb_flush_log_at_trx_commit=1
+sync_binlog=1
+
+
+docker restart master_mysql
+
+4) 再主上面创建slave用户名，并配置权限
+
+docker exec -it master_mysql /bin/bash
+mysql -uroot -proot
+
+CREATE user 'slave'@'%' identified by 'slave';
+GRANT REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 'slave'@'%';
+
+
+5) 配置从
+docker exec -it slave_mysql /bin/bash
+cd /etc/mysql
+编辑 my.cnf
+
+从
+
+[mysqld]
+server-id=11
+log-bin=mysql-slave-bin
+relay_log=edu-mysql-relay-bin
+
+docker restart slave_mysql
+
+
+6) 配置从连接到主的master
+docker inspect --format='{{.NetworkSettings.IPAddress}}' master_mysql
+
+docker exec -it slave_mysql /bin/bash
+mysql -uroot -proot
+
+change master to master_host='172.17.0.2', master_user='slave', master_password='slave', master_port=3306, master_log_file='mysql-bin.000001', master_log_pos=617, master_connect_retry=30;
+
+```
+
+
+
+###### 一、读写分离-动态切换数据源版本1.0
+
+TODO
+
+###### 二、读写分离-数据库框架版本2.0 
+
+TODO
