@@ -33,3 +33,4 @@ build/
 .vscode/
 ../.idea/libraries
 ../../.idea/libraries
+../../.idea/

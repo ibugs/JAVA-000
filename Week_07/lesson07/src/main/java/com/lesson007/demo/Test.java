@@ -1,6 +1,5 @@
 package com.lesson007.demo;
 
-import com.github.javafaker.Faker;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -85,9 +84,9 @@ public class Test {
 
     public static void main(String[] args) {
         Test t = new Test();
-        //t.insertBatch();
+        t.insertBatch(100);
         //t.insert();
-        t.insertBatch2();
+        //t.insertBatch2();
     }
 
 
@@ -95,7 +94,7 @@ public class Test {
     /***
      * 批量插入，使用Statement. addBatch
      */
-    public void insertBatch() {
+    public void insertBatch(int batchCount) {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         try {
@@ -108,7 +107,7 @@ public class Test {
                     " certificate_no) values (?,?,?,?,?,?,?,?,?,?)";
 
             preparedStatement = connection.prepareStatement(sql);
-            for(int i = 0; i< 1000000; i++){
+            for(int i = 0; i< batchCount; i++){
                 preparedStatement.setInt(1,2+i);
                 preparedStatement.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
                 preparedStatement.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
@@ -201,17 +200,17 @@ public class Test {
                         " certificate_no) values (?,?,?,?,?,?,?,?,?,?)";
                 preparedStatement = connection.prepareStatement(sql);
 
-                Faker faker = new Faker();
+                //Faker faker = new Faker();
 
                 preparedStatement.setInt(1,2+i);
                 preparedStatement.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
                 preparedStatement.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
-                preparedStatement.setString(4, faker.name());
+                preparedStatement.setString(4, "zhangsan"+i);
                 preparedStatement.setInt(5, (int) (Math.random() * 100));
                 preparedStatement.setLong(6, new Random().nextLong());
-                preparedStatement.setString(7, faker.stateAbbr());
+                preparedStatement.setString(7, "MNV"+i);
                 preparedStatement.setInt(8, 1);
-                preparedStatement.setString(9, faker.lastName());
+                preparedStatement.setString(9, "zs");
                 preparedStatement.setString(10, new Random().nextLong()+"");
 
                 // 返回影响的行数

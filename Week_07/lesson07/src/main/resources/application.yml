@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    master:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      username: root
+      password: root
+      jdbc-url: jdbc:mysql://127.0.0.1:33309/test1202?characterEncoding=utf-8
+    slave:
+      username: root
+      password: root
+      jdbc-url: jdbc:mysql://127.0.0.1:33306/test1202?characterEncoding=utf-8
+
+logging:
+  level:
+    com.lesson007: debug

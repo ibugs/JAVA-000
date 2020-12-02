@@ -252,7 +252,231 @@ change master to master_host='172.17.0.2', master_user='slave', master_password=
 
 ###### 一、读写分离-动态切换数据源版本1.0
 
-TODO
+
+
+1、测试写主库
+
+``` 
+    @Test
+    public void testWrite() {
+        Person person = new Person();
+        person.setName("zhangsan");
+        person.setAge(18);
+        personService.add(person);
+    }
+```
+
+
+
+``` 
+ com.lesson007.demo.ApplicationTest       : Started ApplicationTest in 2.43 seconds (JVM running for 3.548)
+ c.l.config.DynamicSwitchDBTypeUtil       : 切换数据源:MASTER
+ com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+ com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+ com.lesson007.dao.PersonMapper.insert    : ==>  Preparing: INSERT INTO person ( name,age ) VALUES( ?,? ) 
+ com.lesson007.dao.PersonMapper.insert    : ==> Parameters: zhangsan(String), 18(Integer)
+ com.lesson007.dao.PersonMapper.insert    : <==    Updates: 1
+ com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+ com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+
+```
+
+2、测试读从库
+
+``` 
+    @Test
+    public void testQuery() {
+        List<Person> all = personService.findAll();
+        all.forEach(System.out::println);
+    }
+```
+
+
+
+``` 
+ c.l.config.DynamicSwitchDBTypeUtil       : 切换数据源:SLAVE
+ com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+ com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+ c.lesson007.dao.PersonMapper.selectAll   : ==>  Preparing: SELECT name,age FROM person 
+ c.lesson007.dao.PersonMapper.selectAll   : ==> Parameters: 
+ c.lesson007.dao.PersonMapper.selectAll   : <==      Total: 2
+```
+
+
+
+3、原理
+
+![](./images/read_write.jpeg)
+
+
+
+![](./images/aop_read_write.png)
+
+
+
+1）创建两个注解 read，write
+
+只要在方法上加了**read**注解那么表示该方法对数据库的操作是读操作
+
+``` 
+    PersonService
+	  /***
+     * 代表该方法对数据库的操作是一个读操作
+     * @return
+     */
+    @Read
+    public List<Person> findAll() {
+        return personMapper.selectAll();
+    }
+```
+
+只要在方法上加了**write**注解那么表示该方法对数据库的操作是写操作
+
+``` 
+PersonService
+    /***
+     * 代表该方法对数据库的操作是一个写操作
+     * @param person
+     */
+    @Write
+    public void add(Person person) {
+        personMapper.insert(person);
+    }
+```
+
+
+
+2) 创建动态切换数据源的工具
+
+``` 
+DynamicSwitchDBTypeUtil
+
+    /**
+     * 用来存储代表数据源的对象
+     *  如果是里面存储是SLAVE，代表当前线程正在使用主数据库
+     *  如果是里面存储的是SLAVE,代表当前线程正在使用从数据库
+     */
+    private static final ThreadLocal<DBTypeEnum> CONTEXT_HAND = new ThreadLocal<>();
+
+```
+
+
+
+3) SpringBoot提供了**AbstractRoutingDataSource**，用户根据自己需要自定义的规则去选择当前要使用的数据源
+
+我们在调用业务层方法之前去扫描注解，如果方法上是**read**注解，我们就切换到从数据库，否则就切换到主数据库。
+
+``` 
+public class RouttingDataSource extends AbstractRoutingDataSource {
+    @Override
+    protected Object determineCurrentLookupKey() {
+        /***
+         * 返回当前线程正在使用的代表数据库的枚举对象
+         */
+        return DynamicSwitchDBTypeUtil.get();
+    }
+}
+```
+
+4) 配置数据源
+
+``` 
+DataSourceConfig
+
+    /***
+     * 将创建的master数据源存入Spring容器中，并且注入内容
+     * @return
+     */
+    @Bean
+    @ConfigurationProperties("spring.datasource.master")
+    public DataSource masterDataSource() {
+        return DataSourceBuilder.create().build();
+    }
+
+    /***
+     * 将创建的slave数据源存入Spring容器中，并且注入内容
+     * @return
+     */
+    @Bean
+    @ConfigurationProperties("spring.datasource.slave")
+    public DataSource slaveDataSource() {
+        return DataSourceBuilder.create().build();
+    }
+
+    /***
+     * 决定最终要使用的数据源
+     * @param masterDataSource
+     * @param slaveDataSource
+     * @return
+     */
+    @Bean
+    public DataSource targetDataSource(@Qualifier("masterDataSource") DataSource masterDataSource,
+                                       @Qualifier("slaveDataSource") DataSource slaveDataSource) {
+        // 存放主数据源和从数据源
+        Map<Object, Object> targetDataSource = new HashMap<>();
+
+        // 往map中添加主数据源
+        targetDataSource.put(DBTypeEnum.MASTER, masterDataSource);
+        // 往map中添加从数据源
+        targetDataSource.put(DBTypeEnum.SLAVE, slaveDataSource);
+
+        // 创建 routtingDataSource 用来实现动态切换
+        RouttingDataSource routtingDataSource = new RouttingDataSource();
+        // 绑定所有的数据源
+        routtingDataSource.setTargetDataSources(targetDataSource);
+        // 设置默认的数据源
+        routtingDataSource.setDefaultTargetDataSource(masterDataSource);
+
+        return routtingDataSource;
+    }
+```
+
+5) 配置切面
+
+我们可以利用aop的思想，配置切入点的通知，在调用每一个方法之前去判断，然后切换使用的数据源
+
+``` 
+DataSourceAOP
+
+    /***
+     * 只要加了@Read注解的方法就是一个切入点
+     */
+    @Pointcut("@annotation(com.lesson007.config.Read)")
+    public void readPointcut() {
+    }
+
+    @Pointcut("@annotation(com.lesson007.config.Write)")
+    public void writePointcut() {
+    }
+
+    /***
+     * 配置前通知，如果是readPoint 就切换数据源为从数据库
+     */
+    @Before("readPointcut()")
+    public void readAdvise() {
+        DynamicSwitchDBTypeUtil.slave();
+    }
+
+    /***
+     * 配置前通知，如果wirtePoint就切换数据源为主数据库
+     */
+    @Before("writePointcut()")
+    public void writeAdvise() {
+        DynamicSwitchDBTypeUtil.master();
+    }
+```
+
+
+
+
+
+
+
+参考
+
+[读写分离](https://github.com/smallCodeWangzh/application)
+
+[SpringBoot+MyBatis实现读写分离](https://www.jianshu.com/p/88cfd302c9d2)
 
 ###### 二、读写分离-数据库框架版本2.0 
 
