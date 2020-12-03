@@ -90,7 +90,6 @@ public class Test {
     }
 
 
-
     /***
      * 批量插入，使用Statement. addBatch
      */
@@ -107,26 +106,26 @@ public class Test {
                     " certificate_no) values (?,?,?,?,?,?,?,?,?,?)";
 
             preparedStatement = connection.prepareStatement(sql);
-            for(int i = 0; i< batchCount; i++){
-                preparedStatement.setInt(1,2+i);
+            for (int i = 0; i < batchCount; i++) {
+                preparedStatement.setInt(1, 2 + i);
                 preparedStatement.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
                 preparedStatement.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
-                preparedStatement.setString(4, "张三"+i);
+                preparedStatement.setString(4, "张三" + i);
                 preparedStatement.setInt(5, (int) (Math.random() * 100));
                 preparedStatement.setLong(6, new Random().nextLong());
-                preparedStatement.setString(7, "北京市"+i);
+                preparedStatement.setString(7, "北京市" + i);
                 preparedStatement.setInt(8, 1);
-                preparedStatement.setString(9, "zhangsan"+i);
-                preparedStatement.setString(10, new Random().nextLong()+"");
+                preparedStatement.setString(9, "zhangsan" + i);
+                preparedStatement.setString(10, new Random().nextLong() + "");
                 preparedStatement.addBatch();
-                System.out.println("index ->"+i);
+                System.out.println("index ->" + i);
             }
             // statement.addBatch(sql);
 
             int[] resultCount = preparedStatement.executeBatch();
             connection.commit();
             long end = System.currentTimeMillis();
-            System.out.println("耗时->"+(end - start));
+            System.out.println("耗时->" + (end - start));
         } catch (SQLException e) {
             try {
                 connection.rollback();
@@ -134,7 +133,7 @@ public class Test {
                 ex.printStackTrace();
             }
             e.printStackTrace();
-        }finally {
+        } finally {
             Test.releaseDB(connection, null, null);
         }
     }
@@ -150,28 +149,28 @@ public class Test {
             connection.setAutoCommit(false);
 
             Statement statement = connection.createStatement();
-            for(int i = 0; i< 1000000; i++){
+            for (int i = 0; i < 1000000; i++) {
                 Timestamp createTime = Timestamp.valueOf(LocalDateTime.now());
                 Timestamp updateTime = Timestamp.valueOf(LocalDateTime.now());
-                String name = "张三"+i;
+                String name = "张三" + i;
                 Integer age = (int) (Math.random() * 100);
                 Long phone = new Random().nextLong();
-                String address = "北京市"+i;
+                String address = "北京市" + i;
                 Integer status = 1;
-                String nickName = "zhangsan"+i;
-                String certificateNo = new Random().nextLong()+"";
+                String nickName = "zhangsan" + i;
+                String certificateNo = new Random().nextLong() + "";
                 String sql = "INSERT INTO tb_user (id, create_time, update_time," +
                         " name, age, phone, address, status, nickname," +
-                        " certificate_no) values ("+i+",'"+createTime+"','"+updateTime+"','"+name
-                        +"',"+age+","+phone+",'"+address+"',"+status+",'"+nickName+"',"+certificateNo+");";
+                        " certificate_no) values (" + i + ",'" + createTime + "','" + updateTime + "','" + name
+                        + "'," + age + "," + phone + ",'" + address + "'," + status + ",'" + nickName + "'," + certificateNo + ");";
                 statement.addBatch(sql);
                 //System.out.println("sql=>"+sql);
-                System.out.println("index ->"+i);
+                System.out.println("index ->" + i);
             }
             statement.executeBatch();
             connection.commit();
             long end = System.currentTimeMillis();
-            System.out.println("耗时->"+(end - start));
+            System.out.println("耗时->" + (end - start));
         } catch (SQLException e) {
             try {
                 connection.rollback();
@@ -179,7 +178,7 @@ public class Test {
                 ex.printStackTrace();
             }
             e.printStackTrace();
-        }finally {
+        } finally {
             Test.releaseDB(connection, null, null);
         }
     }
@@ -193,7 +192,7 @@ public class Test {
 
         try {
             Long start = System.currentTimeMillis();
-            for(int i = 0; i < 1000000; i++){
+            for (int i = 0; i < 1000000; i++) {
                 connection = Test.getConnection();
                 String sql = "INSERT INTO tb_user (id, create_time, update_time," +
                         " name, age, phone, address, status, nickname," +
@@ -202,23 +201,23 @@ public class Test {
 
                 //Faker faker = new Faker();
 
-                preparedStatement.setInt(1,2+i);
+                preparedStatement.setInt(1, 2 + i);
                 preparedStatement.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
                 preparedStatement.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
-                preparedStatement.setString(4, "zhangsan"+i);
+                preparedStatement.setString(4, "zhangsan" + i);
                 preparedStatement.setInt(5, (int) (Math.random() * 100));
                 preparedStatement.setLong(6, new Random().nextLong());
-                preparedStatement.setString(7, "MNV"+i);
+                preparedStatement.setString(7, "MNV" + i);
                 preparedStatement.setInt(8, 1);
                 preparedStatement.setString(9, "zs");
-                preparedStatement.setString(10, new Random().nextLong()+"");
+                preparedStatement.setString(10, new Random().nextLong() + "");
 
                 // 返回影响的行数
                 int num = preparedStatement.executeUpdate();
                 Test.releaseDB(connection, preparedStatement, null);
             }
             long end = System.currentTimeMillis();
-            System.out.println("耗时"+(end - start));
+            System.out.println("耗时" + (end - start));
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {

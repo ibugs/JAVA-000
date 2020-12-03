@@ -9,18 +9,19 @@ import org.slf4j.LoggerFactory;
 public class DynamicSwitchDBTypeUtil {
     /**
      * 用来存储代表数据源的对象
-     *  如果是里面存储是SLAVE，代表当前线程正在使用主数据库
-     *  如果是里面存储的是SLAVE,代表当前线程正在使用从数据库
+     * 如果是里面存储是SLAVE，代表当前线程正在使用主数据库
+     * 如果是里面存储的是SLAVE,代表当前线程正在使用从数据库
      */
     private static final ThreadLocal<DBTypeEnum> CONTEXT_HAND = new ThreadLocal<>();
 
     /**
      * 日志对象
      */
-    private static final Logger log =  LoggerFactory.getLogger(DynamicSwitchDBTypeUtil.class);
+    private static final Logger log = LoggerFactory.getLogger(DynamicSwitchDBTypeUtil.class);
 
     /**
      * 切换当前线程要使用的数据源
+     *
      * @param dbTypeEnum
      */
     public static void set(DBTypeEnum dbTypeEnum) {
@@ -56,6 +57,7 @@ public class DynamicSwitchDBTypeUtil {
 
     /**
      * 获取当前线程使用的枚举值
+     *
      * @return
      */
     public static DBTypeEnum get() {

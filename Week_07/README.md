@@ -1,12 +1,12 @@
 学习笔记
 
-##### 第13节课作业实践
+## 第13节课作业实践
 
-###### 一、按照自己设计的表结构，插入100万订单模拟数据，测试不同方式的插入效率。
+#### 一、按照自己设计的表结构，插入100万订单模拟数据，测试不同方式的插入效率。
 
 [代码](./lesson07/src/main/java/com/lesson007/demo/Test.java)
 
-1. 使用JDBC preparedStatement.executeUpdate
+###### 1. 使用JDBC preparedStatement.executeUpdate
 
 
 如果不关闭连接，不关闭Connection的时候，就会出现下面的错误
@@ -64,14 +64,13 @@ connection 用一次，然后释放一次。总共使用了100万次，再释放
     }
 ```
 
-2. 使用JDBC PreparedStatement executeBatch();
+###### 2. 使用JDBC PreparedStatement executeBatch();
 
 耗时：204秒
 
-改进点   
+改进点
 
 1）整个过程 connection 只使用一次，大大减少了创建connection和销毁的过程
-
 2) 使用addBatch，将100万的数据编译一次，传递给MySQL执行。
 
 ``` 
@@ -121,7 +120,7 @@ connection 用一次，然后释放一次。总共使用了100万次，再释放
     }
 ```
 
-3) 使用 Statement addBatch
+###### 3) 使用 Statement addBatch
 
 耗时：214秒
 
@@ -172,16 +171,16 @@ connection 用一次，然后释放一次。总共使用了100万次，再释放
     }
 ```
 
-4) 使用MySQl的存储过程
+###### 4) 使用MySQl的存储过程
 
 TODO
 
-##### 第14节课作业实践
+## 第14节课作业实践
 
 [Docker方式实现MySQL主从复制](https://www.jianshu.com/p/661f70a7274e)
 [Docker安装MySQL](https://www.jianshu.com/p/d9b6bbc7fd77)
 
-准备工作，使用Docker配置MySQL的主从复制
+###### 准备工作，使用Docker配置MySQL的主从复制
 
 ``` 
 1）使用Docker运行MySQL容器
@@ -250,11 +249,9 @@ change master to master_host='172.17.0.2', master_user='slave', master_password=
 
 
 
-###### 一、读写分离-动态切换数据源版本1.0
+#### 一、读写分离-动态切换数据源版本1.0
 
-
-
-1、测试写主库
+###### 1、测试写主库
 
 ``` 
     @Test
@@ -281,7 +278,7 @@ change master to master_host='172.17.0.2', master_user='slave', master_password=
 
 ```
 
-2、测试读从库
+###### 2、测试读从库
 
 ``` 
     @Test
@@ -304,11 +301,9 @@ change master to master_host='172.17.0.2', master_user='slave', master_password=
 
 
 
-3、原理
+###### 3、原理
 
 ![](./images/read_write.jpeg)
-
-
 
 ![](./images/aop_read_write.png)
 
@@ -478,6 +473,68 @@ DataSourceAOP
 
 [SpringBoot+MyBatis实现读写分离](https://www.jianshu.com/p/88cfd302c9d2)
 
-###### 二、读写分离-数据库框架版本2.0 
+#### 二、读写分离-数据库框架版本2.0
 
-TODO
+使用shardingsphere  sharding-jdbc 来实现
+
+[代码](./mysharding/src/test/java/com/mysharding/sapplication/SapplicationApplicationTests.java)
+```
+// 配置真实数据源
+Map<String, DataSource> dataSourceMap = new HashMap<>();
+
+// 配置主库
+BasicDataSource masterDataSource = new BasicDataSource();
+masterDataSource.setDriverClassName("com.mysql.jdbc.Driver");
+masterDataSource.setUrl("jdbc:mysql://127.0.0.1:33309/test1202?characterEncoding=utf-8");
+masterDataSource.setUsername("root");
+masterDataSource.setPassword("root");
+dataSourceMap.put("ds_master", masterDataSource);
+
+// 配置第一个从库
+BasicDataSource slaveDataSource1 = new BasicDataSource();
+slaveDataSource1.setDriverClassName("com.mysql.jdbc.Driver");
+slaveDataSource1.setUrl("jdbc:mysql://127.0.0.1:33306/test1202?characterEncoding=utf-8");
+slaveDataSource1.setUsername("root");
+slaveDataSource1.setPassword("root");
+dataSourceMap.put("ds_slave0", slaveDataSource1);
+
+// 配置第二个从库 TODO
+Properties sqlShow = new Properties();
+sqlShow.setProperty("props.sql.show", "true");
+
+// 配置读写分离规则
+MasterSlaveRuleConfiguration masterSlaveRuleConfig =
+        new MasterSlaveRuleConfiguration("ds_master_slave",
+                "ds_master",
+                Arrays.asList("ds_slave0"));
+// 获取数据源对象
+DataSource dataSource = MasterSlaveDataSourceFactory.
+        createDataSource(dataSourceMap,
+                masterSlaveRuleConfig, sqlShow);
+
+
+String selectSql = "SELECT t.* FROM tb_user AS t WHERE id = ?";
+Connection conn = dataSource.getConnection();
+try (PreparedStatement preparedStatement = conn.prepareStatement(selectSql)) {
+    preparedStatement.setInt(1, 100);
+    try (ResultSet rs = preparedStatement.executeQuery()) {
+        while(rs.next()) {
+            System.out.println(rs.getInt(1));
+            System.out.println(rs.getString(4));
+        }
+    }
+}
+
+String updateSql = "UPDATE tb_user SET tb_user.name =? WHERE id = ?";
+try(PreparedStatement preparedStatement  = conn.prepareStatement(updateSql)){
+   preparedStatement.setString(1, "wanghao");
+   preparedStatement.setInt(2, 100);
+   int result = preparedStatement.executeUpdate();
+    System.out.println(result);
+}
+```
+
+
+
+[参考](https://shardingsphere.apache.org/document/legacy/4.x/document/cn/manual/sharding-jdbc/usage/read-write-splitting/#%E4%BD%BF%E7%94%A8%E5%8E%9F%E7%94%9Fjdbc) 
+

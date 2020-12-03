@@ -1,6 +1,6 @@
 package com.lesson007.config;
 
-public enum  DBTypeEnum {
+public enum DBTypeEnum {
     /***
      * 主
      */
